@@ -33,6 +33,10 @@ public class Deck {
         cards.add(card);
     }
 
+    public Card removeCard() {
+        return cards.remove(0);
+    }
+
     public Card removeCard(int index) {
         return cards.remove(index);
     }
@@ -47,6 +51,10 @@ public class Deck {
 
     public Card getCard(int index) {
         return cards.get(index);
+    }
+
+    public int getIndex(Card card) {
+        return cards.indexOf(card);
     }
 
     public List<Card> getCards() {
@@ -66,6 +74,9 @@ public class Deck {
         }
     }
 
+    /**
+     * Performs a Fisher–Yates shuffle on the deck, in place.
+     */
     public void shuffle() {
         int idx;
         Card temp, current;
@@ -83,6 +94,10 @@ public class Deck {
 
     public int numCards() {
         return cards.size();
+    }
+
+    public Card[] toCardArray() {
+        return cards.toArray(new Card[cards.size()]);
     }
 
     public String toString() {
