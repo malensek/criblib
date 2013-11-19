@@ -1,0 +1,42 @@
+package jcrib;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Player {
+    private String name;
+    private int points;
+    private Hand hand;
+    private Card cut;
+    private List<List<Score>> scores = new ArrayList<>();
+
+    public Player(String name) {
+        this.name = name;
+        this.hand = new Hand();
+    }
+
+    public void addScores(List<Score> scores) {
+        this.scores.add(scores);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Hand getHand() {
+        return hand;
+    }
+
+    public Card getCutCard() {
+        return cut;
+    }
+
+    public void setCutCard(Card cut) {
+        this.cut = cut;
+    }
+
+    @Override
+    public String toString() {
+        return name + ": " + points + " pts; " + hand.toString();
+    }
+}
