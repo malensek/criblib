@@ -31,7 +31,6 @@ public class Play {
         for (Score score : scores) {
             System.out.println(score);
         }
-        System.out.println("--");
         return scores;
     }
 
