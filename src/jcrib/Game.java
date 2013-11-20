@@ -20,9 +20,8 @@ public class Game {
     private Player turn;
     private Player dealer;
     private Hand crib;
-
+    private Card starter;
     private Play play;
-
     private Deck deck;
 
     public Game(Player player1, Player player2) {
@@ -30,57 +29,14 @@ public class Game {
         players.add(player2);
 
         deck = new Deck();
+        cuts = 0;
         startCut();
         turn = player1;
     }
 
-    public boolean playerAction(Player player, Action action) {
-        if (logger.isLoggable(Level.INFO)) {
-            logger.info(player.getName() + " -> " + action);
-        }
-
-        State state = action.getActionState();
-        if (state != currentState) {
-            logger.warning("Illegal play: wrong game state");
-            return false;
-        }
-        if (player != turn) {
-            logger.warning("Illegal play: wrong player's turn");
-            return false;
-        }
-
-        switch (state) {
-            case Cut:
-                return selectCutCard(player, action.getCardId());
-
-            case Crib:
-                return moveToCrib(player, action.getCardId());
-
-            case Play:
-                return playCard(player, action.getCardId());
-
-            default:
-                return false;
-        }
-    }
-
-    private boolean playCard(Player player, int cardNumber) {
-        List<Score> scores =
-            play.playCard(player.getHand().removeCard(cardNumber));
-        player.addScores(scores);
-
-        Player next = getNextPlayer();
-        if (play.checkPlayable(next)) {
-            nextPlayer();
-            return true;
-        } else if (play.checkPlayable(player)) {
-            return true;
-        } else {
-            /* Go */
-            player.addScores(play.go());
-            nextPlayer();
-        }
-        return true;
+    private void startCut() {
+        deck.shuffle();
+        this.currentState = State.Cut;
     }
 
     private void startPlay() {
@@ -97,11 +53,55 @@ public class Game {
         currentState = State.Crib;
     }
 
-    private boolean moveToCrib(Player player, int cardNumber) {
-        if (cardNumber >= player.getHand().numCards()) {
-            logger.warning("Invalid card index: " + cardNumber);
-            return false;
+    public Card drawStarter() {
+        starter = deck.removeCard();
+        return starter;
+    }
+
+    private void verifyAction(Player player, Game.State state)
+    throws IllegalPlayException {
+        if (state != currentState) {
+            throw new IllegalPlayException("Incorrect game state");
         }
+
+        if (player != turn) {
+            throw new IllegalPlayException("Wrong player's turn");
+        }
+    }
+
+    public void playCard(Player player, int cardNumber) {
+        if (logger.isLoggable(Level.INFO)) {
+            logger.info(player.getName() + " plays card " + cardNumber);
+        }
+
+        List<Score> scores =
+            play.playCard(player.getHand().removeCard(cardNumber));
+        player.addScores(scores);
+
+        Player next = getNextPlayer();
+        if (play.checkPlayable(next)) {
+            nextPlayer();
+        } else if (play.checkPlayable(player)) {
+            /* Current player keeps playing */
+            return;
+        } else {
+            /* Go */
+            player.addScores(play.go());
+            nextPlayer();
+        }
+    }
+
+    public void moveToCrib(Player player, int cardNumber)
+    throws IllegalPlayException {
+        if (logger.isLoggable(Level.INFO)) {
+            logger.info(player.getName() + " moves card " + cardNumber
+                    + " to crib");
+        }
+
+        if (cardNumber >= player.getHand().numCards()) {
+            throw new IllegalPlayException("Invalid card index: " + cardNumber);
+        }
+
         crib.addCard(player.getHand().removeCard(cardNumber));
 
         if (logger.isLoggable(Level.INFO)) {
@@ -115,16 +115,10 @@ public class Game {
             nextPlayer();
             play = new Play();
         }
-
-        return true;
     }
 
-    private void startCut() {
-        deck.shuffle();
-        this.currentState = State.Cut;
-    }
-
-    public boolean selectCutCard(Player player, int cardNumber) {
+    public void selectCutCard(Player player, int cardNumber)
+    throws IllegalPlayException {
         if (cardNumber >= deck.numCards()) {
             cardNumber = deck.numCards() - 1;
         }
@@ -133,10 +127,8 @@ public class Game {
         cuts++;
 
         if (cuts == players.size()) {
-            return determineFirst();
+            determineFirst();
         }
-
-        return true;
     }
 
     private boolean determineFirst() {
@@ -194,5 +186,9 @@ public class Game {
 
     public Player getCurrentPlayer() {
         return turn;
+    }
+
+    public Player getDealer() {
+        return dealer;
     }
 }
