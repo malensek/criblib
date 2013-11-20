@@ -35,6 +35,10 @@ public class Player {
         this.cut = cut;
     }
 
+    public int getPoints() {
+        return points;
+    }
+
     @Override
     public String toString() {
         return name + ": " + points + " pts; " + hand.toString();
