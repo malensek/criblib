@@ -32,8 +32,8 @@ public class Hand extends Deck {
     @Override
     public String toString() {
         String str = "";
-        for (int i = 0; i < cards.size(); ++i) {
-            str += cards.get(i) + " (" + i + ") ";
+        for (Card card : cards) {
+            str += card + " ";
         }
         return str;
     }
