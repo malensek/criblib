@@ -1,4 +1,4 @@
-package jcrib;
+package jcrib.cards;
 
 public enum Suit {
     Spade,

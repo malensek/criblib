@@ -1,6 +1,4 @@
-
-
-package jcrib;
+package jcrib.cards;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +59,7 @@ public class Deck {
         return cards;
     }
 
+    /*
     public void deal(int numCards, Player... players) {
         deal(numCards, players);
     }
@@ -73,7 +72,7 @@ public class Deck {
             }
         }
     }
-
+*/
     /**
      * Performs a Fisher–Yates shuffle on the deck, in place.
      */
