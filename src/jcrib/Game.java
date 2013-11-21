@@ -1,10 +1,13 @@
 package jcrib;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import jcrib.cards.Card;
+import jcrib.cards.Deck;
+import jcrib.cards.Hand;
 
 public class Game {
 
@@ -34,6 +37,18 @@ public class Game {
         turn = player1;
     }
 
+    public static void deal(Deck deck, int numCards, Player... players) {
+        deal(deck, numCards, players);
+    }
+
+    public static void deal(Deck deck, int numCards, Iterable<Player> players) {
+        for (int i = 0; i < numCards; ++i) {
+            for (Player player : players) {
+                Card card = deck.removeCard();
+                player.getHand().addCard(card);
+            }
+        }
+    }
     private void startCut() {
         deck.shuffle();
         this.currentState = State.Cut;
@@ -47,7 +62,7 @@ public class Game {
         if (players.size() > 2) {
             cards = 5;
         }
-        deck.deal(cards, players);
+        deal(deck, cards, players);
 
         crib = new Hand();
         currentState = State.Crib;
@@ -160,6 +175,7 @@ public class Game {
             startPlay();
             return true;
         } else {
+            cuts = 0;
             return false;
         }
     }
