@@ -3,6 +3,9 @@ package jcrib;
 import java.util.ArrayList;
 import java.util.List;
 
+import jcrib.cards.Card;
+import jcrib.cards.Hand;
+
 public class Player {
     private String name;
     private int points;
@@ -41,6 +44,6 @@ public class Player {
 
     @Override
     public String toString() {
-        return name + ": " + points + " pts; " + hand.toString();
+        return name + ": " + getPoints() + " pts; " + hand.toString();
     }
 }
