@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import jcrib.cards.Card;
+import jcrib.cards.Hand;
+import jcrib.cards.Suit;
 
 /**
  * Demo Cribbage application that uses the library.
@@ -63,7 +65,6 @@ public class Demo {
             }
         }
         System.out.println(game.getDealer().getName() + " deals first!");
-        System.out.println();
 
         while (true) {
             /* Have players place cards into the crib */
@@ -71,7 +72,6 @@ public class Demo {
                 crib(player, 2);
             }
 
-            System.out.println();
             System.out.println("Beginning play.");
             Card starter = game.drawStarter();
             System.out.println("Starter Card: " + starter);
@@ -80,10 +80,22 @@ public class Demo {
             while (playing) {
                 Player currentPlayer = game.getCurrentPlayer();
                 Card[] hand = currentPlayer.getHand().toCardArray();
+                Arrays.sort(hand);
                 System.out.println("Turn: " + currentPlayer.getName() + " ("
                         + currentPlayer.getPoints() + ")");
                 printHand(hand);
-                int index = printPrompt(currentPlayer, 0, hand.length);
+
+                /* Find the largest card that can be played */
+                int maxCard = 31 - game.getPlayState().getCurrentSum();
+                int maxLength = 0;
+                for (Card card : hand) {
+                    if (card.getValue() > maxCard) {
+                        break;
+                    }
+                    maxLength++;
+                }
+
+                int index = printPrompt(currentPlayer, 0, maxLength);
                 int handIndex = currentPlayer.getHand().getIndex(hand[index]);
                 game.playCard(currentPlayer, handIndex);
                 System.out.println();
