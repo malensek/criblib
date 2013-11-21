@@ -1,5 +1,7 @@
 package jcrib;
 
+import jcrib.cards.Card;
+
 public class Score {
 
     public enum Type { Fifteen, ThirtyOne, Pair, Run, Flush, Nobs, Heels, Go };
