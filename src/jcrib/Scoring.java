@@ -4,7 +4,33 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import jcrib.cards.Card;
+import jcrib.cards.Face;
+import jcrib.cards.Hand;
+import jcrib.cards.Suit;
+
 public class Scoring {
+    public int scoreHand(Hand hand, Card starter) {
+        List<Score> scores = new ArrayList<>();
+        List<Card> cards = hand.getCards();
+        Card[] allCards = cards.toArray(new Card[cards.size() + 1]);
+        allCards[cards.size()] = starter;
+
+        scores.addAll(Scoring.nobs(allCards, starter));
+        scores.addAll(Scoring.fifteens(allCards));
+        scores.addAll(Scoring.pairs(allCards));
+        scores.addAll(Scoring.flush(allCards));
+        scores.addAll(Scoring.runs(allCards));
+
+        int points = 0;
+        for (Score score : scores) {
+            points += score.getPoints();
+            System.out.println(score);
+        }
+        return points;
+    }
+
+
     public static List<Score> nobs(Card[] cards, Card starter) {
         List<Score> scores = new ArrayList<>();
         if (starter.getFace() == Face.Jack) {
