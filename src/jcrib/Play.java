@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import jcrib.cards.Card;
+
 public class Play {
 
     private List<Card> cards = new ArrayList<>();
@@ -62,20 +64,21 @@ public class Play {
     }
 
     private List<Score> pairs() {
-        List<Score> largestScore = new ArrayList<>();
-
-        for (int subsetSize = 2; subsetSize <= cards.size(); ++subsetSize) {
-            List<Card> sub = subset(subsetSize);
-            Card[] subset = sub.toArray(new Card[sub.size()]);
-            List<Score> score = Scoring.pairs(subset);
-            if (score.size() > 0) {
-                largestScore = score;
+        Card lastCard = cards.get(cards.size() - 1);
+        List<Card> pairCards = new ArrayList<>();
+        pairCards.add(lastCard);
+        for (int i = cards.size() - 2; i >= 0; --i) {
+            if (cards.get(i).getOrdinal() == lastCard.getOrdinal()) {
+                pairCards.add(cards.get(i));
             } else {
                 break;
             }
         }
 
-        return largestScore;
+        List<Score> scores
+            = Scoring.pairs(pairCards.toArray(new Card[pairCards.size()]));
+
+        return scores;
     }
 
     private List<Score> runs() {
