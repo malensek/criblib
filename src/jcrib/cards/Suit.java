@@ -1,5 +1,12 @@
 package jcrib.cards;
 
+/**
+ * Represents the four suits of a standard 52-card deck: spades, hearts,
+ * diamonds, and clubs.  The suits can be displayed as symbols or by a single
+ * letter.
+ *
+ * @author malensek
+ */
 public enum Suit {
     Spade,
     Heart,
