@@ -32,7 +32,6 @@ import jcrib.cards.Hand;
 
 public class Player {
     private String name;
-    private int points;
     private Hand hand;
     private Card cut;
     private List<List<Score>> scores = new ArrayList<>();
@@ -63,7 +62,13 @@ public class Player {
     }
 
     public int getPoints() {
-        return points;
+        int total = 0;
+        for (List<Score> score : scores) {
+            for (Score subScore : score) {
+                total += subScore.getPoints();
+            }
+        }
+        return total;
     }
 
     @Override
