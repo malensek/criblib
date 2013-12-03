@@ -40,6 +40,9 @@ public class Play {
         List<Score> scores = new ArrayList<>();
         Card[] scoringCards = cards.toArray(new Card[cards.size()]);
 
+        scores.addAll(pairs());
+        scores.addAll(runs());
+
         /* Check for 15s and 31s */
         int sum = Scoring.sumCards(cards);
         if (sum == 15) {
@@ -50,9 +53,6 @@ public class Play {
             scores.add(thirtyOne);
             cards.clear();
         }
-
-        scores.addAll(pairs());
-        scores.addAll(runs());
 
         for (Score score : scores) {
             System.out.println(score);
