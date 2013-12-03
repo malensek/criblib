@@ -45,6 +45,12 @@ public class Player {
         this.scores.add(scores);
     }
 
+    public void addScore(Score score) {
+        List<Score> scoreList = new ArrayList<>();
+        scoreList.add(score);
+        this.scores.add(scoreList);
+    }
+
     public String getName() {
         return name;
     }
