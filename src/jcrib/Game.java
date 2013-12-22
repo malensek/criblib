@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 
 import jcrib.cards.Card;
 import jcrib.cards.Deck;
+import jcrib.cards.Face;
 import jcrib.cards.Hand;
 
 public class Game {
@@ -94,6 +95,10 @@ public class Game {
 
     public Card drawStarter() {
         starter = deck.removeCard();
+        if (starter.getFace() == Face.Jack) {
+            dealer.addScore(new Score(Score.Type.Heels,
+                        new Card[] { starter }, 2));
+        }
         return starter;
     }
 

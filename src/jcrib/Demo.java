@@ -32,6 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jcrib.cards.Card;
+import jcrib.cards.Face;
 import jcrib.cards.Hand;
 import jcrib.cards.Suit;
 
@@ -99,6 +100,10 @@ public class Demo {
             System.out.println("Beginning play.");
             Card starter = game.drawStarter();
             System.out.println("Starter Card: " + starter);
+            if (starter.getFace() == Face.Jack) {
+                System.out.println("Starter is a Jack.  Dealer scores 2 for "
+                        + "his heels!");
+            }
 
             boolean playing = true;
             while (playing) {
