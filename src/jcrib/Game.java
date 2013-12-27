@@ -118,8 +118,8 @@ public class Game {
             logger.info(player.getName() + " plays card " + cardNumber);
         }
 
-        List<Score> scores =
-            play.playCard(player.getHand().removeCard(cardNumber));
+        Card card = player.getHand().removeCard(cardNumber);
+        List<Score> scores = play.playCard(card);
         player.addScores(scores);
 
         Player next = getNextPlayer();
