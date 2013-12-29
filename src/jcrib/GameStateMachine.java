@@ -32,8 +32,10 @@ public class GameStateMachine {
         prepareCut();
     }
 
-    private void changeState(State state) {
+    private StateEvent changeState(State state) {
+        StateEvent event = new StateEvent(state);
         currentState = state;
+        return event;
     }
 
     private void incrementStateToken() {
@@ -139,8 +141,8 @@ public class GameStateMachine {
             return new StateEvent(State.Cut);
         } else {
             dealer = first;
-            changeState(State.Play);
-            return new StateEvent(State.Play);
+            StateEvent event = changeState(State.Crib);
+            return event;
         }
     }
 
