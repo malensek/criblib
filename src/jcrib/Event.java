@@ -5,9 +5,10 @@ import java.util.List;
 public class Event {
 
     public enum EventType { OK, StateChange };
-    private EventType eventType;
 
-    private List<Score> scores;
+    protected EventType eventType;
+    protected GameStateMachine.State state;
+    protected List<Score> scores;
 
     public Event(EventType eventType) {
         this.eventType = eventType;
