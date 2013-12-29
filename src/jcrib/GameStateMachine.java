@@ -4,6 +4,7 @@ package jcrib;
 import java.util.ArrayList;
 import java.util.List;
 
+import jcrib.Event.EventType;
 import jcrib.cards.Card;
 import jcrib.cards.Deck;
 import jcrib.cards.Hand;
@@ -28,9 +29,7 @@ public class GameStateMachine {
         players.add(player1);
         players.add(player2);
 
-        deck = new Deck();
-        deck.shuffle();
-        changeState(State.Cut);
+        prepareCut();
     }
 
     private void changeState(State state) {
@@ -41,7 +40,7 @@ public class GameStateMachine {
         stateToken++;
     }
 
-    public Result executeAction(Player player, Action action)
+    public Event executeAction(Player player, Action action)
         throws IllegalPlayException, InvalidStateException,
                           InvalidStateTokenException {
 
@@ -60,36 +59,62 @@ public class GameStateMachine {
                 return cutDeck(player, action.getCardNumber());
 
             case Crib:
-
                 return null;
 
             case Play:
-
                 return null;
+
+            default:
+                throw new InvalidStateException("Unknown state!");
         }
-        return null;
     }
 
-    private Result cutDeck(Player player, int cardNumber)
+    /**
+     * Prepares for players to cut the deck: the deck is shuffled and the game
+     * state is updated.
+     */
+    private void prepareCut() {
+        deck = new Deck();
+        deck.shuffle();
+        changeState(State.Cut);
+    }
+
+    private Event cutDeck(Player player, int cardNumber)
     throws IllegalPlayException {
+        /* For the sake of simplicity, we assume that an out-of-bounds card
+         * index selects either the first or last card.  This eliminates the
+         * need to inform clients of the card indexes other clients have
+         * selected. */
+        if (cardNumber < 0) {
+            cardNumber = 0;
+        }
         if (cardNumber >= deck.numCards()) {
             cardNumber = deck.numCards() - 1;
         }
 
-        player.setCutCard(deck.removeCard(cardNumber));
+        Card cutCard = deck.removeCard(cardNumber);
+        player.setCutCard(cutCard);
 
         for (Player p : players) {
             if (p.getCutCard() == null) {
                 /* Keep cutting */
-                return new Result(Result.Type.OK);
+                return new Event(EventType.OK);
             }
         }
 
         /* Done cutting */
-        return whoGoesFirst();
+        return whoDealsFirst();
     }
 
-    private Result whoGoesFirst() {
+    /**
+     * Once each player has cut the deck, this method determines which player
+     * will deal first.  If there is a tie (players cut the same value of card)
+     * then a re-cut will take place.
+     *
+     * @return StateEvent informing clients to either move on to selecting cards
+     * to place in the crib, or re-cut.
+     */
+    private StateEvent whoDealsFirst() {
         int lowest = Integer.MAX_VALUE;
         boolean tie = false;
         Player first = null;
@@ -105,12 +130,17 @@ public class GameStateMachine {
             }
         }
 
-        if (!tie) {
+        if (tie) {
+            /* There was a tie: Reset players' cut cards */
+            for (Player p : players) {
+                p.setCutCard(null);
+            }
+            prepareCut();
+            return new StateEvent(State.Cut);
+        } else {
             dealer = first;
             changeState(State.Play);
-            return new Result(Result.Type.OK);
-        } else {
-            return new Result(Result.Type.Recut);
+            return new StateEvent(State.Play);
         }
     }
 
