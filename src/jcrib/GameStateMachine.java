@@ -4,15 +4,13 @@ package jcrib;
 import java.util.ArrayList;
 import java.util.List;
 
-import jcrib.Event.EventType;
 import jcrib.cards.Card;
 import jcrib.cards.Deck;
 import jcrib.cards.Hand;
 
 public class GameStateMachine {
 
-    public enum State { Cut, Crib, Play };
-    private State currentState;
+    private GameState currentState;
     private int stateToken;
 
     private List<Player> players = new ArrayList<>();
@@ -32,19 +30,19 @@ public class GameStateMachine {
         prepareCut();
     }
 
-    private StateEvent changeState(State state) {
-        StateEvent event = new StateEvent(state);
+    private Result changeState(GameState state) {
         currentState = state;
-        return event;
+        Result result = new Result(state);
+        return result;
     }
 
     private void incrementStateToken() {
         stateToken++;
     }
 
-    public Event executeAction(Player player, Action action)
-        throws IllegalPlayException, InvalidStateException,
-                          InvalidStateTokenException {
+    public Result executeAction(Player player, Action action)
+    throws IllegalPlayException, InvalidStateException,
+            InvalidStateTokenException {
 
         if (action.getState() != currentState) {
             throw new InvalidStateException(
@@ -67,7 +65,7 @@ public class GameStateMachine {
                 return null;
 
             default:
-                throw new InvalidStateException("Unknown state!");
+                throw new InvalidStateException("Unknown state");
         }
     }
 
@@ -78,11 +76,10 @@ public class GameStateMachine {
     private void prepareCut() {
         deck = new Deck();
         deck.shuffle();
-        changeState(State.Cut);
+        changeState(GameState.Cut);
     }
 
-    private Event cutDeck(Player player, int cardNumber)
-    throws IllegalPlayException {
+    private Result cutDeck(Player player, int cardNumber) {
         /* For the sake of simplicity, we assume that an out-of-bounds card
          * index selects either the first or last card.  This eliminates the
          * need to inform clients of the card indexes other clients have
@@ -100,7 +97,7 @@ public class GameStateMachine {
         for (Player p : players) {
             if (p.getCutCard() == null) {
                 /* Keep cutting */
-                return new Event(EventType.OK);
+                return new Result();
             }
         }
 
@@ -116,7 +113,7 @@ public class GameStateMachine {
      * @return StateEvent informing clients to either move on to selecting cards
      * to place in the crib, or re-cut.
      */
-    private StateEvent whoDealsFirst() {
+    private Result whoDealsFirst() {
         int lowest = Integer.MAX_VALUE;
         boolean tie = false;
         Player first = null;
@@ -138,12 +135,10 @@ public class GameStateMachine {
                 p.setCutCard(null);
             }
             prepareCut();
-            return new StateEvent(State.Cut);
+            return new Result(GameState.Cut);
         } else {
             dealer = first;
-            StateEvent event = changeState(State.Crib);
-            return event;
+            return changeState(GameState.Crib);
         }
     }
-
 }

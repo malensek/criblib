@@ -4,17 +4,17 @@ package jcrib;
 
 public class Action {
 
-    private GameStateMachine.State state;
+    private GameState state;
     private int stateToken;
     private int cardNumber;
 
-    public Action(GameStateMachine.State state, int stateToken, int cardNumber) {
+    public Action(GameState state, int stateToken, int cardNumber) {
         this.state = state;
         this.stateToken = stateToken;
         this.cardNumber = cardNumber;
     }
 
-    public GameStateMachine.State getState() {
+    public GameState getState() {
         return state;
     }
 

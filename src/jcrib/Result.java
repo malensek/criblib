@@ -5,16 +5,12 @@ import java.util.List;
 
 public class Result {
 
-    public enum Type { OK, Recut, Score }
-    private Type type;
-
+    private GameState state;
     private List<Score> scores;
 
-    public Result(Type type) {
-        this.type = type;
-    }
+    public Result() { }
 
-    public Type getType() {
-        return type;
+    public Result(GameState newState) {
+        this.state = newState;
     }
 }
