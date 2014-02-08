@@ -32,9 +32,15 @@ import jcrib.cards.Card;
 
 public class Play {
 
+    private boolean finished = false;
+    private List<Player> players;
     private List<Card> cards = new ArrayList<>();
 
-    public List<Score> playCard(Card card) {
+    public Play(List<Player> players) {
+        this.players = players;
+    }
+
+    public List<Score> playCard(Player player, Card card) {
         cards.add(card);
 
         List<Score> scores = new ArrayList<>();
@@ -43,30 +49,78 @@ public class Play {
         scores.addAll(pairs());
         scores.addAll(runs());
 
-        /* Check for 15s and 31s */
         int sum = Scoring.sumCards(cards);
         if (sum == 15) {
             Score fifteen = new Score(Score.Type.Fifteen, scoringCards, 2);
             scores.add(fifteen);
-        } else if (sum == 31) {
+        }
+        if (sum == 31) {
             Score thirtyOne = new Score(Score.Type.ThirtyOne, scoringCards, 2);
             scores.add(thirtyOne);
             cards.clear();
+        } else if (lastCard()) {
+            /* Player played the last card and didn't score 31. */
+            Score last = new Score(Score.Type.LastCard, scoringCards, 1);
+            scores.add(last);
+            cards.clear();
+        } else if (go(player)) {
+            Score go = new Score(Score.Type.Go, scoringCards, 1);
+            scores.add(go);
+            cards.clear();
         }
 
-        for (Score score : scores) {
-            System.out.println(score);
+        if (lastCard()) {
+            finished = true;
         }
+
         return scores;
     }
 
-    public List<Score> go() {
-        System.out.println("GO!");
-        cards.clear();
-        List<Score> goScore = new ArrayList<>();
-        goScore.add(new Score(Score.Type.Go,
-                    cards.toArray(new Card[cards.size()]), 1));
-        return goScore;
+    /**
+     * Determines if the card that was just played was the last card.
+     */
+    private boolean lastCard() {
+        for (Player player : players) {
+            if (player.getHand().size() > 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Determines if the card that was just played forced the other players
+     * into a "go."
+     */
+    private boolean go(Player player) {
+        if (nextPlayableTurn(player) == null) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns the player that plays after the specified player
+     * (who's got next!)
+     */
+    public Player getNextPlayer(Player player) {
+        return players.get((players.indexOf(player) + 1) % players.size());
+    }
+
+    /**
+     * Determines the next Player than can play.  If none of the players can
+     * play, the method returns null.
+     */
+    public Player nextPlayableTurn(Player currentTurn) {
+        Player current = currentTurn;
+        for (int i = 0; i < players.size(); ++i) {
+            current = getNextPlayer(current);
+            if (checkPlayable(current)) {
+                return current;
+            }
+        }
+        /* None of the players could play */
+        return null;
     }
 
     public boolean checkPlayable(Player player) {
@@ -129,6 +183,10 @@ public class Play {
 
     public int getCurrentSum() {
         return Scoring.sumCards(cards);
+    }
+
+    public boolean isFinished() {
+        return finished;
     }
 
     @Override
