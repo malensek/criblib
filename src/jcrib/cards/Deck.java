@@ -170,9 +170,9 @@ public class Deck {
     /**
      * Retrieves the number of cards in the deck.
      *
-     * @return number of cards that are currently in the deck
+     * @return number of cards that are currently in the deck.
      */
-    public int numCards() {
+    public int size() {
         return cards.size();
     }
 
