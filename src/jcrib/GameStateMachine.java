@@ -87,8 +87,8 @@ public class GameStateMachine {
         if (cardNumber < 0) {
             cardNumber = 0;
         }
-        if (cardNumber >= deck.numCards()) {
-            cardNumber = deck.numCards() - 1;
+        if (cardNumber >= deck.size()) {
+            cardNumber = deck.size() - 1;
         }
 
         Card cutCard = deck.removeCard(cardNumber);
