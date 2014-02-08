@@ -28,7 +28,12 @@ import jcrib.cards.Card;
 
 public class Score {
 
-    public enum Type { Fifteen, ThirtyOne, Pair, Run, Flush, Nobs, Heels, Go };
+    public enum Type {
+        Fifteen, ThirtyOne,
+        Pair, Run, Flush,
+        Nobs, Heels,
+        Go, LastCard
+    };
 
     private Type type;
     private Card[] cards;
