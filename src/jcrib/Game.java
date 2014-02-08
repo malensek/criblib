@@ -49,7 +49,7 @@ public class Game {
     private Player dealer;
     private Hand crib;
     private Card starter;
-    private Play play;
+    private Play playState;
     private Deck deck;
 
     public Game(Player player1, Player player2) {
@@ -102,37 +102,22 @@ public class Game {
         return starter;
     }
 
-    private void verifyAction(Player player, Game.State state)
-    throws IllegalPlayException {
-        if (state != currentState) {
-            throw new IllegalPlayException("Incorrect game state");
-        }
-
-        if (player != turn) {
-            throw new IllegalPlayException("Wrong player's turn");
-        }
-    }
-
-    public void playCard(Player player, int cardNumber) {
+    public List<Score> playCard(Player player, int cardNumber) {
         if (logger.isLoggable(Level.INFO)) {
             logger.info(player.getName() + " plays card " + cardNumber);
         }
 
         Card card = player.getHand().removeCard(cardNumber);
-        List<Score> scores = play.playCard(card);
+        List<Score> scores = playState.playCard(player, card);
         player.addScores(scores);
 
-        Player next = getNextPlayer();
-        if (play.checkPlayable(next)) {
-            nextPlayer();
-        } else if (play.checkPlayable(player)) {
-            /* Current player keeps playing */
-            return;
+        if (playState.isFinished()) {
+            System.out.println("Round over!");
         } else {
-            /* Go */
-            player.addScores(play.go());
-            nextPlayer();
+            turn = playState.nextPlayableTurn(player);
         }
+
+        return scores;
     }
 
     public void moveToCrib(Player player, int cardNumber)
@@ -142,7 +127,7 @@ public class Game {
                     + " to crib");
         }
 
-        if (cardNumber >= player.getHand().numCards()) {
+        if (cardNumber >= player.getHand().size()) {
             throw new IllegalPlayException("Invalid card index: " + cardNumber);
         }
 
@@ -153,18 +138,17 @@ public class Game {
         }
 
         /* Crib is ready to go, start playing. */
-        if (crib.numCards() == 4) {
+        if (crib.size() == 4) {
             currentState = State.Play;
-            turn = dealer;
-            nextPlayer();
-            play = new Play();
+            playState = new Play(players);
+            turn = playState.nextPlayableTurn(dealer);
         }
     }
 
     public void selectCutCard(Player player, int cardNumber)
     throws IllegalPlayException {
-        if (cardNumber >= deck.numCards()) {
-            cardNumber = deck.numCards() - 1;
+        if (cardNumber >= deck.size()) {
+            cardNumber = deck.size() - 1;
         }
 
         player.setCutCard(deck.removeCard(cardNumber));
@@ -209,14 +193,6 @@ public class Game {
         }
     }
 
-    public void nextPlayer() {
-        turn = players.get((players.indexOf(turn) + 1) % players.size());
-    }
-
-    public Player getNextPlayer() {
-        return players.get((players.indexOf(turn) + 1) % players.size());
-    }
-
     public List<Player> getPlayers() {
         return players;
     }
@@ -226,7 +202,7 @@ public class Game {
     }
 
     public Play getPlayState() {
-        return play;
+        return playState;
     }
 
     public Player getCurrentPlayer() {
