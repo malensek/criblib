@@ -127,8 +127,15 @@ public class Demo {
                 int index = printPrompt(currentPlayer, 0, maxLength);
                 int handIndex = currentPlayer.getHand().getIndex(hand[index]);
                 game.playCard(currentPlayer, handIndex);
-                System.out.println();
                 System.out.println(game.getPlayState());
+                if (game.getPlayState().isFinished()) {
+                    break;
+                }
+            }
+
+            System.out.println("Finished pegging.");
+            for (Player player : game.getPlayers()) {
+                System.out.println(player.getName() + " " + player.getPoints());
             }
         }
     }
