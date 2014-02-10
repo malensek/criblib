@@ -137,13 +137,23 @@ public class Demo {
                 System.out.println(player.getName() + " " + player.getPoints());
             }
 
-            Map<String, List<Score>> handScores = game.finalizeRound();
+            List<Score> cribScore = game.getCribScore();
+            Map<String, List<Score>> handScores = game.getHandScores();
+
             for (String playerName : handScores.keySet()) {
                 System.out.println(playerName + "'s hand score:");
                 for (Score score : handScores.get(playerName)) {
                     System.out.println(score);
                 }
+                if (playerName.equals(game.getDealer().getName())) {
+                    System.out.println("Crib score:");
+                    for (Score score : cribScore) {
+                        System.out.println(score);
+                    }
+                }
             }
+
+            game.finishRound();
 
             System.out.println("Current score:");
             for (Player player : game.getPlayers()) {

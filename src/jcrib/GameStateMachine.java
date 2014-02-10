@@ -24,6 +24,7 @@ public class GameStateMachine {
     private Hand crib;
     private Card starter;
 
+    private List<Score> cribScore;
     private Map<String, List<Score>> handScores;
 
     private Play playState;
@@ -208,18 +209,18 @@ public class GameStateMachine {
             List<Score> scores = Scoring.scoreHand(player.getHand(), starter);
             handScores.put(player.getName(), scores);
         }
+        cribScore = Scoring.scoreHand(crib, starter);
     }
 
-    public Map<String, List<Score>> finalizeRound()
+    public void finishRound()
     throws InvalidStateException {
         if (currentState == GameState.Score) {
-            Map<String, List<Score>> roundHandScores = handScores;
             for (Player player : players) {
-                List<Score> scores = roundHandScores.get(player.getName());
+                List<Score> scores = handScores.get(player.getName());
                 player.addScores(scores);
             }
+            dealer.addScores(cribScore);
             changeState(GameState.Crib);
-            return roundHandScores;
         } else {
             throw new InvalidStateException("Round not over");
         }
@@ -296,5 +297,13 @@ public class GameStateMachine {
 
     public int getLargestPlayableCard() {
         return playState.getLargestPlayableCard();
+    }
+
+    public List<Score> getCribScore() {
+        return cribScore;
+    }
+
+    public Map<String, List<Score>> getHandScores() {
+        return handScores;
     }
 }
