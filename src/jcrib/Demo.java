@@ -25,7 +25,6 @@ software, even if advised of the possibility of such damage.
 package jcrib;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
@@ -44,7 +43,7 @@ import jcrib.cards.Suit;
  *
  * @author malensek
  */
-public class Demo2 {
+public class Demo {
 
     private static GameStateMachine game;
     private static BufferedReader commandLine;
