@@ -220,6 +220,7 @@ public class GameStateMachine {
                 player.addScores(scores);
             }
             dealer.addScores(cribScore);
+            dealer = playState.getNextPlayer(dealer);
             changeState(GameState.Crib);
         } else {
             throw new InvalidStateException("Round not over");
