@@ -34,7 +34,8 @@ import jcrib.cards.Hand;
 import jcrib.cards.Suit;
 
 public class Scoring {
-    public int scoreHand(Hand hand, Card starter) {
+
+    public static List<Score> scoreHand(Hand hand, Card starter) {
         List<Score> scores = new ArrayList<>();
         List<Card> cards = hand.getCards();
         Card[] allCards = cards.toArray(new Card[cards.size() + 1]);
@@ -46,14 +47,8 @@ public class Scoring {
         scores.addAll(Scoring.flush(allCards));
         scores.addAll(Scoring.runs(allCards));
 
-        int points = 0;
-        for (Score score : scores) {
-            points += score.getPoints();
-            System.out.println(score);
-        }
-        return points;
+        return scores;
     }
-
 
     public static List<Score> nobs(Card[] cards, Card starter) {
         List<Score> scores = new ArrayList<>();
@@ -81,6 +76,7 @@ public class Scoring {
         List<Score> scores = new ArrayList<>();
         for (int i = 0; i < cards.length; ++i) {
             List<Card> runCards = new ArrayList<>();
+            Arrays.sort(cards);
             runCards.add(cards[i]);
             int ord = cards[i].getOrdinal();
             int run = 1;
