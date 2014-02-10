@@ -28,6 +28,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,13 +44,14 @@ import jcrib.cards.Suit;
  *
  * @author malensek
  */
-public class Demo {
+public class Demo2 {
 
-    private static Game game;
+    private static GameStateMachine game;
     private static BufferedReader commandLine;
+    private static int stateToken = 0;
 
     public static void main(String[] args)
-    throws IllegalPlayException, IOException {
+    throws Exception {
 
         /* Quiet the logger for the Demo */
         final Logger logger = Logger.getLogger("jcrib");
@@ -73,22 +77,10 @@ public class Demo {
         System.out.println();
         System.out.println("Hello, " + player1 + " and " + player2 + "!");
 
-        game = new Game(new Player(player1), new Player(player2));
+        game = new GameStateMachine(new Player(player1), new Player(player2));
 
         /* Determine who goes first */
-        System.out.println("Please cut the deck (enter a number 0-51):");
-        while (true) {
-            cutDeck();
-            for (Player player : game.getPlayers()) {
-                System.out.println(player.getName()
-                        + " drew " + player.getCutCard());
-            }
-            if (game.getState() != Game.State.Cut) {
-                break;
-            } else {
-                System.out.println("Tie!  Please cut the deck again.");
-            }
-        }
+        cutDeck();
         System.out.println(game.getDealer().getName() + " deals first!");
 
         while (true) {
@@ -98,15 +90,14 @@ public class Demo {
             }
 
             System.out.println("Beginning play.");
-            Card starter = game.drawStarter();
+            Card starter = game.getStarterCard();
             System.out.println("Starter Card: " + starter);
             if (starter.getFace() == Face.Jack) {
                 System.out.println("Starter is a Jack.  Dealer scores 2 for "
                         + "his heels!");
             }
 
-            boolean playing = true;
-            while (playing) {
+            while (true) {
                 Player currentPlayer = game.getCurrentPlayer();
                 Card[] hand = currentPlayer.getHand().toCardArray();
                 Arrays.sort(hand);
@@ -115,7 +106,7 @@ public class Demo {
                 printHand(hand);
 
                 /* Find the largest card that can be played */
-                int maxCard = 31 - game.getPlayState().getCurrentSum();
+                int maxCard = game.getLargestPlayableCard();
                 int maxLength = 0;
                 for (Card card : hand) {
                     if (card.getValue() > maxCard) {
@@ -126,19 +117,49 @@ public class Demo {
 
                 int index = printPrompt(currentPlayer, 0, maxLength);
                 int handIndex = currentPlayer.getHand().getIndex(hand[index]);
-                game.playCard(currentPlayer, handIndex);
-                System.out.println(game.getPlayState());
-                if (game.getPlayState().isFinished()) {
+                Result result = game.executeAction(
+                        currentPlayer, GameState.Play, stateToken, handIndex);
+
+                if (result.hasScore()) {
+                    for (Score score : result.getScores()) {
+                        System.out.println(score);
+                    }
+                }
+
+                if (result.stateChanged()) {
                     break;
                 }
+
+                printPlay();
             }
 
-            System.out.println("Finished pegging.");
+            System.out.println("Finished pegging:");
             for (Player player : game.getPlayers()) {
                 System.out.println(player.getName() + " " + player.getPoints());
             }
-            game.startPlay();
+
+            Map<String, List<Score>> handScores = game.finalizeRound();
+            for (String playerName : handScores.keySet()) {
+                System.out.println(playerName + "'s hand score:");
+                for (Score score : handScores.get(playerName)) {
+                    System.out.println(score);
+                }
+            }
+
+            System.out.println("Current score:");
+            for (Player player : game.getPlayers()) {
+                System.out.println(player.getName() + " " + player.getPoints());
+            }
         }
+    }
+
+    public static void printPlay() {
+        String play = " ";
+        for (Card card : game.getCardsInPlay()) {
+            play += card + " ";
+        }
+        System.out.println("[" + play + "]" + " - "
+                + game.getCurrentPlayTotal());
     }
 
     public static int printPrompt(Player player) {
@@ -186,15 +207,30 @@ public class Demo {
         System.out.println();
     }
 
-    public static void cutDeck() throws IllegalPlayException {
+    public static void cutDeck() throws IllegalPlayException,
+           InvalidStateException, InvalidStateTokenException {
+
+        Result result = null;
+
+        System.out.println("Please cut the deck (enter a number 0-51):");
+
         for (Player player : game.getPlayers()) {
             int card = printPrompt(player, 0, 52);
-            game.selectCutCard(player, card);
+            result = game.executeAction(player,
+                    GameState.Cut, stateToken, card);
+            System.out.println(player.getName()
+                    + " drew " + player.getCutCard());
+        }
+
+        if (!result.stateChanged()) {
+            System.out.println("Tie!  Please cut the deck again.");
+            cutDeck();
         }
     }
 
     public static void crib(Player player, int numCards)
-    throws IllegalPlayException {
+    throws IllegalPlayException, InvalidStateException, 
+                      InvalidStateTokenException {
         System.out.println("Move " + numCards + " cards to the crib.");
         for (int i = 0; i < numCards; ++i) {
             System.out.println(player.getName() + "'s cards:");
@@ -204,7 +240,7 @@ public class Demo {
             printHand(cards);
             int index = printPrompt(player, 0, hand.getCards().size());
             int handIndex = hand.getIndex(cards[index]);
-            game.moveToCrib(player, handIndex);
+            game.executeAction(player, GameState.Crib, stateToken, handIndex);
         }
     }
 }
