@@ -27,7 +27,9 @@ package jcrib;
 
 public class InvalidStateException extends Exception {
 
-    public InvalidStateException() {
+    private static final long serialVersionUID = 6893784002819065460L;
+
+	public InvalidStateException() {
         super();
     }
 

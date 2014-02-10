@@ -27,7 +27,10 @@ package jcrib;
 
 public class InvalidStateTokenException extends Exception {
 
-    public InvalidStateTokenException() {
+
+    private static final long serialVersionUID = -2538996423079163199L;
+
+	public InvalidStateTokenException() {
         super();
     }
 
