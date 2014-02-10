@@ -45,7 +45,7 @@ import jcrib.cards.Suit;
  */
 public class Demo {
 
-    private static GameStateMachine game;
+    private static Game game;
     private static BufferedReader commandLine;
     private static int stateToken = 0;
 
@@ -76,7 +76,7 @@ public class Demo {
         System.out.println();
         System.out.println("Hello, " + player1 + " and " + player2 + "!");
 
-        game = new GameStateMachine(new Player(player1), new Player(player2));
+        game = new Game(new Player(player1), new Player(player2));
 
         /* Determine who goes first */
         cutDeck();

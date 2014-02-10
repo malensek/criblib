@@ -12,7 +12,7 @@ import jcrib.cards.Deck;
 import jcrib.cards.Face;
 import jcrib.cards.Hand;
 
-public class GameStateMachine {
+public class Game {
 
     private GameState currentState;
     private int stateToken;
@@ -29,7 +29,7 @@ public class GameStateMachine {
 
     private Play playState;
 
-    public GameStateMachine(Player player1, Player player2) {
+    public Game(Player player1, Player player2) {
         players.add(player1);
         players.add(player2);
 
@@ -68,6 +68,8 @@ public class GameStateMachine {
                 scoreHands();
                 playState = new Play(players, dealer);
                 return;
+
+            case Score: return;
         }
     }
 
