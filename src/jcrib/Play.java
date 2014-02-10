@@ -26,22 +26,39 @@ package jcrib;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import jcrib.cards.Card;
 
 public class Play {
 
+    /** When Play is over, this variable is set to true. */
     private boolean finished = false;
+
     private List<Player> players;
+    private Queue<Player> turnHistory = new LinkedList<Player>();
+    private Player dealer;
+    private Player turn;
+
     private List<Card> cards = new ArrayList<>();
 
+    //TODO: remove this constructor (later)
     public Play(List<Player> players) {
         this.players = players;
     }
 
+    public Play(List<Player> players, Player dealer) {
+        this.players = players;
+        this.dealer = dealer;
+        turn = getNextPlayer(dealer);
+    }
+
     public List<Score> playCard(Player player, Card card) {
         cards.add(card);
+        turnHistory.offer(player);
 
         List<Score> scores = new ArrayList<>();
         Card[] scoringCards = cards.toArray(new Card[cards.size()]);
@@ -54,6 +71,7 @@ public class Play {
             Score fifteen = new Score(Score.Type.Fifteen, scoringCards, 2);
             scores.add(fifteen);
         }
+
         if (sum == 31) {
             Score thirtyOne = new Score(Score.Type.ThirtyOne, scoringCards, 2);
             scores.add(thirtyOne);
@@ -64,6 +82,7 @@ public class Play {
             scores.add(last);
             cards.clear();
         } else if (go(player)) {
+            /* Did the card that was just played force others to say 'Go?' */
             Score go = new Score(Score.Type.Go, scoringCards, 1);
             scores.add(go);
             cards.clear();
@@ -71,8 +90,11 @@ public class Play {
 
         if (lastCard()) {
             finished = true;
+        } else {
+            turn = nextPlayableTurn(player);
         }
 
+        player.addScores(scores);
         return scores;
     }
 
@@ -183,6 +205,18 @@ public class Play {
 
     public int getCurrentSum() {
         return Scoring.sumCards(cards);
+    }
+
+    public Player getCurrentPlayer() {
+        return turn;
+    }
+
+    public int getLargestPlayableCard() {
+        return 31 - getCurrentSum();
+    }
+
+    public List<Card> getCardsInPlay() {
+        return cards;
     }
 
     public boolean isFinished() {

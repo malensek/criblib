@@ -2,10 +2,14 @@
 package jcrib;
 
 import java.util.ArrayList;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jcrib.cards.Card;
 import jcrib.cards.Deck;
+import jcrib.cards.Face;
 import jcrib.cards.Hand;
 
 public class GameStateMachine {
@@ -14,14 +18,15 @@ public class GameStateMachine {
     private int stateToken;
 
     private List<Player> players = new ArrayList<>();
-    private Player turn;
     private Player dealer;
 
     private Deck deck;
     private Hand crib;
     private Card starter;
 
-    private Play play;
+    private Map<String, List<Score>> handScores;
+
+    private Play playState;
 
     public GameStateMachine(Player player1, Player player2) {
         players.add(player1);
@@ -32,12 +37,44 @@ public class GameStateMachine {
 
     private Result changeState(GameState state) {
         currentState = state;
+        stateTransition(state);
         Result result = new Result(state);
         return result;
     }
 
     private void incrementStateToken() {
         stateToken++;
+    }
+
+    /**
+     * Prepares for a state transition --- this can include state-dependent
+     * initialization.
+     */
+    private void stateTransition(GameState state) {
+        switch (state) {
+            case Cut:
+                deck = new Deck();
+                deck.shuffle();
+                return;
+
+            case Crib:
+                handScores = new HashMap<>();
+                preparePlay();
+                return;
+
+            case Play:
+                drawStarter();
+                scoreHands();
+                playState = new Play(players, dealer);
+                return;
+        }
+    }
+
+    public Result executeAction(Player player,
+            GameState state, int stateToken, int cardNumber)
+    throws IllegalPlayException, InvalidStateException,
+            InvalidStateTokenException {
+        return executeAction(player, new Action(state, stateToken, cardNumber));
     }
 
     public Result executeAction(Player player, Action action)
@@ -59,10 +96,10 @@ public class GameStateMachine {
                 return cutDeck(player, action.getCardNumber());
 
             case Crib:
-                return null;
+                return moveToCrib(player, action.getCardNumber());
 
             case Play:
-                return null;
+                return playCard(player, action.getCardNumber());
 
             default:
                 throw new InvalidStateException("Unknown state");
@@ -74,9 +111,29 @@ public class GameStateMachine {
      * state is updated.
      */
     private void prepareCut() {
+        changeState(GameState.Cut);
+    }
+
+    public static void deal(Deck deck, int numCards, Iterable<Player> players) {
+        for (int i = 0; i < numCards; ++i) {
+            for (Player player : players) {
+                Card card = deck.removeCard();
+                player.getHand().addCard(card);
+            }
+        }
+    }
+
+    private void preparePlay() {
         deck = new Deck();
         deck.shuffle();
-        changeState(GameState.Cut);
+
+        int cards = 6;
+        if (players.size() > 2) {
+            cards = 5;
+        }
+        deal(deck, cards, players);
+
+        crib = new Hand();
     }
 
     private Result cutDeck(Player player, int cardNumber) {
@@ -101,8 +158,71 @@ public class GameStateMachine {
             }
         }
 
-        /* Done cutting */
+        /* Everyone has cut.  Can we start? */
         return whoDealsFirst();
+    }
+
+    public Result moveToCrib(Player player, int cardNumber)
+    throws IllegalPlayException {
+        checkHandIndex(player, cardNumber);
+
+        Card cribCard = player.getHand().removeCard(cardNumber);
+        crib.addCard(cribCard);
+
+        if (crib.size() == 4) {
+            return changeState(GameState.Play);
+        }
+        return new Result();
+    }
+
+    private void drawStarter() {
+        starter = deck.removeCard();
+
+        /* If the dealer draws a Jack, he/she gets 2 points for his heels. */
+        if (starter.getFace() == Face.Jack) {
+            dealer.addScore(new Score(Score.Type.Heels,
+                        new Card[] { starter }, 2));
+        }
+    }
+
+    public Result playCard(Player player, int cardNumber)
+    throws IllegalPlayException {
+        checkHandIndex(player, cardNumber);
+        Card card = player.getHand().removeCard(cardNumber);
+        List<Score> scores = playState.playCard(player, card);
+
+        Result result = new Result();
+        if (playState.isFinished()) {
+            result = changeState(GameState.Score);
+        }
+
+        if (scores.size() > 0) {
+            result.setScores(scores);
+        }
+
+        return result;
+    }
+
+    private void scoreHands() {
+        for (Player player : players) {
+            List<Score> scores = Scoring.scoreHand(player.getHand(), starter);
+            handScores.put(player.getName(), scores);
+        }
+    }
+
+    public Map<String, List<Score>> finalizeRound()
+    throws InvalidStateException {
+        if (currentState == GameState.Score) {
+            Map<String, List<Score>> roundHandScores = handScores;
+            for (Player player : players) {
+                List<Score> scores = roundHandScores.get(player.getName());
+                player.addScores(scores);
+            }
+            changeState(GameState.Crib);
+            return roundHandScores;
+        } else {
+            throw new InvalidStateException("Round not over");
+        }
     }
 
     /**
@@ -135,10 +255,46 @@ public class GameStateMachine {
                 p.setCutCard(null);
             }
             prepareCut();
-            return new Result(GameState.Cut);
+            return new Result();
         } else {
             dealer = first;
             return changeState(GameState.Crib);
         }
+    }
+
+    private void checkHandIndex(Player player, int cardNumber)
+    throws IllegalPlayException {
+        if (cardNumber >= player.getHand().size()) {
+            throw new IllegalPlayException("Invalid card index: "
+                    + cardNumber);
+        }
+    }
+
+    public List<Player> getPlayers() {
+        return this.players;
+    }
+
+    public Player getCurrentPlayer() {
+        return playState.getCurrentPlayer();
+    }
+
+    public Player getDealer() {
+        return dealer;
+    }
+
+    public Card getStarterCard() {
+        return starter;
+    }
+
+    public int getCurrentPlayTotal() {
+        return playState.getCurrentSum();
+    }
+
+    public List<Card> getCardsInPlay() {
+        return playState.getCardsInPlay();
+    }
+
+    public int getLargestPlayableCard() {
+        return playState.getLargestPlayableCard();
     }
 }
