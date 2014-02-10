@@ -137,6 +137,7 @@ public class Demo {
             for (Player player : game.getPlayers()) {
                 System.out.println(player.getName() + " " + player.getPoints());
             }
+            game.startPlay();
         }
     }
 
