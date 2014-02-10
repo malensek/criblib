@@ -79,7 +79,7 @@ public class Game {
         this.currentState = State.Cut;
     }
 
-    private void startPlay() {
+    public void startPlay() {
         deck = new Deck();
         deck.shuffle();
 
