@@ -30,8 +30,14 @@ public class Card implements Comparable<Card> {
     private int value;
 
     public Card(String cardName) {
-        String id = cardName.substring(0, 1).toUpperCase();
-        String suit = cardName.substring(1, 2).toUpperCase();
+        if (cardName.length() > 3) {
+            throw new IllegalArgumentException("Malformed Card identifier");
+        }
+
+        int len = cardName.length();
+
+        String id = cardName.substring(0, len - 1).toUpperCase();
+        String suit = cardName.substring(len - 1, len).toUpperCase();
 
         try {
             value = Integer.parseInt(id);
