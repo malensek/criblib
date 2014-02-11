@@ -208,6 +208,7 @@ public class Game {
         checkHandIndex(player, cardNumber);
         Card card = player.getHand().removeCard(cardNumber);
         List<Score> scores = playState.playCard(player, card);
+        addScores(player, scores);
 
         Result result = new Result();
         if (playState.isFinished()) {
@@ -232,11 +233,13 @@ public class Game {
     public void finishRound()
     throws InvalidStateException {
         if (currentState == GameState.Score) {
-            for (Player player : players) {
+            Player player = playState.getNextPlayer(dealer);
+            for (int i = 0; i < players.size(); ++i) {
                 List<Score> scores = handScores.get(player.getName());
-                player.addScores(scores);
+                addScores(player, scores);
+                player = playState.getNextPlayer(player);
             }
-            dealer.addScores(cribScore);
+            addScores(dealer, cribScore);
             dealer = playState.getNextPlayer(dealer);
             changeState(GameState.Crib);
         } else {
@@ -278,6 +281,13 @@ public class Game {
         } else {
             dealer = first;
             return changeState(GameState.Crib);
+        }
+    }
+
+    private void addScores(Player player, List<Score> scores) {
+        player.addScores(scores);
+        if (player.getPoints() >= targetScore) {
+            // winner winner chicken dinner?
         }
     }
 
