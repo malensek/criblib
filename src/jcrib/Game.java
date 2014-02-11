@@ -14,6 +14,9 @@ import jcrib.cards.Hand;
 
 public class Game {
 
+    private static final int DEFAULT_TARGET_SCORE = 121;
+    private int targetScore = DEFAULT_TARGET_SCORE;
+
     private GameState currentState;
     private int stateToken;
 
@@ -29,9 +32,21 @@ public class Game {
 
     private Play playState;
 
-    public Game(Player player1, Player player2) {
-        players.add(player1);
-        players.add(player2);
+    public Game(Player... players) {
+        this(DEFAULT_TARGET_SCORE, players);
+    }
+
+    public Game(int targetScore, Player... players) {
+        if (players.length > 4) {
+            throw new IllegalArgumentException("Cannot support more than "
+                    + "four players.");
+        }
+
+        this.targetScore = targetScore;
+
+        for (Player player : players) {
+            this.players.add(player);
+        }
 
         prepareCut();
     }
