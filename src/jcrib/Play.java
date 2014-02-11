@@ -40,19 +40,12 @@ public class Play {
 
     private List<Player> players;
     private Queue<Player> turnHistory = new LinkedList<Player>();
-    private Player dealer;
     private Player turn;
 
     private List<Card> cards = new ArrayList<>();
 
-    //TODO: remove this constructor (later)
-    public Play(List<Player> players) {
-        this.players = players;
-    }
-
     public Play(List<Player> players, Player dealer) {
         this.players = players;
-        this.dealer = dealer;
         turn = getNextPlayer(dealer);
     }
 
@@ -94,7 +87,6 @@ public class Play {
             turn = nextPlayableTurn(player);
         }
 
-        player.addScores(scores);
         return scores;
     }
 
