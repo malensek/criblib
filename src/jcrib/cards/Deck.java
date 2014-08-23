@@ -25,6 +25,7 @@ software, even if advised of the possibility of such damage.
 package jcrib.cards;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -33,7 +34,7 @@ import java.util.Random;
  *
  * @author malensek
  */
-public class Deck {
+public class Deck implements Iterable<Card> {
 
     protected List<Card> cards = new ArrayList<>();
 
@@ -190,6 +191,10 @@ public class Deck {
      */
     public Card[] toCardArray() {
         return cards.toArray(new Card[cards.size()]);
+    }
+
+    public Iterator<Card> iterator() {
+        return cards.iterator();
     }
 
     @Override
