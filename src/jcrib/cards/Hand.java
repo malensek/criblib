@@ -37,6 +37,13 @@ public class Hand extends Deck {
         cards.clear();
     }
 
+    /**
+     * Constructs a copy of a Hand.
+     */
+    public Hand(Hand h) {
+        super(h);
+    }
+
     @Override
     public String toString() {
         String str = "";
