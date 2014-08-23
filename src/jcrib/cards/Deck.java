@@ -67,6 +67,13 @@ public class Deck {
     }
 
     /**
+     * Constructs a copy of a Deck.
+     */
+    public Deck(Deck d) {
+        this.cards = new ArrayList<>(d.getCards());
+    }
+
+    /**
      * Places a card at the end of the deck.
      *
      * @param card Card to place in the deck.
