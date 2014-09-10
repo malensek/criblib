@@ -50,6 +50,16 @@ public class Scoring {
         return scores;
     }
 
+    public static List<Score> scoreHand(Hand hand) {
+        List<Score> scores = new ArrayList<>();
+        Card[] cards = hand.toCardArray();
+        scores.addAll(Scoring.fifteens(cards));
+        scores.addAll(Scoring.pairs(cards));
+        scores.addAll(Scoring.flush(cards));
+        scores.addAll(Scoring.runs(cards));
+        return scores;
+    }
+
     public static List<Score> nobs(Card[] cards, Card starter) {
         List<Score> scores = new ArrayList<>();
         if (starter.getFace() == Face.Jack) {
