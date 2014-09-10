@@ -15,7 +15,7 @@
     <property name="docs" value="docs/api"/>
     <property name="depcache" value="depcache"/>
     <property name="jar.name"
-            value="${lib}/${ant.project.name}-${project.version}.jar"/>
+            value="${ant.project.name}-${project.version}.jar"/>
     <property name="jar.main" value="jcrib.Demo"/>
     <property file="build.properties"/>
 
