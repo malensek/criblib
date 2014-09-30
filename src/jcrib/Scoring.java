@@ -143,7 +143,10 @@ public class Scoring {
         List<Score> scores = new ArrayList<>();
         for (int i = 0; i < cards.length; ++i) {
             for (int j = i + 1; j < cards.length; ++j) {
-                if (cards[i].equals(cards[j])) {
+                /* Compare card number (1-13), ignoring suit */
+                int card1Num = cards[i].getOrdinal();
+                int card2Num = cards[j].getOrdinal();
+                if (card1Num == card2Num) {
                     Card[] pair = { cards[i], cards[j] };
                     scores.add(new Score(Score.Type.Pair, pair, 2));
                 }
