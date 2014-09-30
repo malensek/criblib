@@ -100,12 +100,19 @@ public class Card implements Comparable<Card> {
             return false;
         }
 
+        Card other = (Card) obj;
+
+        if (this.suit != other.suit) {
+            return false;
+        }
+
         return compareTo((Card) obj) == 0;
     }
 
     @Override
     public int compareTo(Card other) {
-        return this.getOrdinal() - other.getOrdinal();
+        return (this.getOrdinal() - other.getOrdinal()) * 10
+            + this.getSuit().ordinal() - other.getSuit().ordinal();
     }
 
     @Override
