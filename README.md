@@ -1,4 +1,4 @@
-jcrib
-=====
+criblib
+=======
 
-Cribbage play/hand scoring library
+A cribbage play/hand scoring library in Java
